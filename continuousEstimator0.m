@@ -1,5 +1,6 @@
-%%% Team Members: WRITE YOUR TEAM MEMBERS' NAMES HERE
+%%% Team Members: Louise Baron, Sarah Cechnicka, Yse d'Ailhaud de Brisis, Kacper Kazaniecki
 %%% BMI Spring 2015 (Update 17th March 2015)
+% 
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %         PLEASE READ BELOW            %
