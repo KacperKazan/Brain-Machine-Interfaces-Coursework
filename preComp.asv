@@ -1,0 +1,132 @@
+% pre-comp hw
+
+load monkeydata_training;
+
+% plotting tuning curves for movement directions = directional preference
+% of individual neural units 
+angles = [30/180*pi,70/180*pi,110/180*pi,150/180*pi,190/180*pi,230/180*pi,310/180*pi,350/180*pi]
+neuralbin=zeros(98,8);
+for spike = 1:98
+    nb = spike; % neural unit number
+    direction= zeros(100,8);
+    % Storing the firing rates 
+    frs = zeros(100,8); 
+    % Looping through all time 
+    for i = 1:100  % for each trial
+        for j = 1:8 % for each angle
+            sp_t = trial(i,j).spikes(nb,:); %
+            N = length(sp_t); 
+        
+            % Store firing rate for the trial & angle 
+            frs(i,j) = sum(sp_t)/N; 
+        end 
+    end
+
+    % Averaging across trials
+    av = mean(frs);
+
+
+
+    for angleindex=1:8
+        neuralbin(nb, angleindex) = av(angleindex);
+    end
+    
+    % Plotting average firing rate depending on angle? 
+    %figure;
+    %scatter(angles,av);
+    %hold on;
+    %plot(angles,av);
+    %title('Neuron 12');
+    %xlabel('Angle'); ylabel('Average firing rate');
+end
+
+k = 1;
+n = 1;
+x = trial(n,k).handPos(1,:);
+y = trial(n,k).handPos(2,:);
+times = 1:length(x);
+
+%[dirs{:}] = arrayfun(@(t) , times, UniformOutput=false);
+%%
+dirs = zeros([length(x), 2]);
+for t = times
+    temp = get_direction(n, k, t, neuralbin, trial);
+    dirs(t, :) = temp;
+end
+%%disp(dirs)
+disp("_________dirs______________________")
+non_nan_indices = find(~isnan(dirs));
+%dirs(isnan(dirs)) = 0;
+
+%non_nan_dirs = dirs();
+non_nan_dirs = dirs(all((~isnan(dirs)),2), :);
+non_nan_indices = find(all((~isnan(dirs)),2));
+
+disp(size(non_nan_dirs));
+
+estimated_angles = arrayfun(@(v1, v2) vec2angle([v1, v2]), non_nan_dirs(:, 1), non_nan_dirs(:, 2));
+
+plot(non_nan_indices, rad2deg(estimated_angles));
+real_angles = zeros([length(non_nan_indices), 1]);
+disp(class_real)
+
+%%
+for i = 1:length(non_nan_indices)
+    non_nan_index = non_nan_indices(i);
+    if non_nan_indices ~= length(x)
+        x_diff = x(non_nan_index + 1) - x(non_nan_index);
+        y_diff = y(non_nan_index + 1) - y(non_nan_index);
+        real_angles(i) = vec2angle([x_diff, y_diff]);
+    end
+end
+
+plot(non_nan_indices, real_angles);
+disp(size(real_angles));
+disp(size(estimated_angles));
+
+disp(class(estimated_angles));
+disp(class(real_angles));
+angle_diff = angdiff(real_angles, estimated_angles);
+figrue();
+plot(non_nan_indices, angle_diff);
+
+%%
+function [res] = get_direction(n, k, t, neuralbin, trial)
+    angles = [30/180*pi,70/180*pi,110/180*pi,150/180*pi,190/180*pi,230/180*pi,310/180*pi,350/180*pi];
+    % For one specific trial and angle 
+    spikes = trial(n,k).spikes(:,t);
+
+    fired = find(spikes == 1);
+    % weight for each angle
+    weights = zeros([8, 1]);
+    for fired_i = 1:size(fired, 1)
+        % sum to the weights
+        n = fired(fired_i);
+        for k = 1:8
+            weights(k) = weights(k) + neuralbin(n,k);
+        end
+    end
+    weights = normalize(weights);
+    [angle_vectors{1:2}] = arrayfun(@angle2vec, angles);
+    x_dir = 0;
+    y_dir = 0;
+    for k = 1:8
+        x_dir = x_dir + weights(k) * angle_vectors{1}(k);
+        y_dir = y_dir + weights(k) * angle_vectors{2}(k);
+    end
+    disp("--------------")
+    disp(x_dir)
+    disp(y_dir)
+    res = [x_dir, y_dir]
+end
+
+
+
+function [x, y] = angle2vec(angle) % get directional vector from angle
+    x = cos(angle);
+    y = sin(angle);
+end
+
+function ang = vec2angle(v)
+    ang = angle(v(1)+1i*v(2));
+end
