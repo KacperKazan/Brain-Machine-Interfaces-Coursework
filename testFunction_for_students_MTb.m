@@ -4,15 +4,15 @@
 % the relevant modelParameters, and then calls the function
 % "positionEstimator" to decode the trajectory. 
 
-function RMSE = testFunction_for_students_MTb(teamName)
+function RMSE = testFunction_for_students_MTb()
 
-load monkeydata0.mat
+load monkeydata_training
 
 % Set random number generator
 rng(2013);
 ix = randperm(length(trial));
 
-addpath(teamName);
+% addpath(teamName);
 
 % Select training and testing data (you can choose to split your data in a different way if you wish)
 trainingData = trial(ix(1:50),:);
@@ -29,14 +29,14 @@ axis square
 grid
 
 % Train Model
-modelParameters = positionEstimatorTraining(trainingData);
+modelParameters = Ktraining(trainingData)
 
 for tr=1:size(testData,1)
     display(['Decoding block ',num2str(tr),' out of ',num2str(size(testData,1))]);
     pause(0.001)
     for direc=randperm(8) 
         decodedHandPos = [];
-
+        
         times=320:20:size(testData(tr,direc).spikes,2);
         
         for t=times
@@ -47,10 +47,10 @@ for tr=1:size(testData,1)
             past_current_trial.startHandPos = testData(tr,direc).handPos(1:2,1); 
             
             if nargout('positionEstimator') == 3
-                [decodedPosX, decodedPosY, newParameters] = positionEstimator(past_current_trial, modelParameters);
+                [decodedPosX, decodedPosY, newParameters] = Ktest(past_current_trial, modelParameters, direc);
                 modelParameters = newParameters;
             elseif nargout('positionEstimator') == 2
-                [decodedPosX, decodedPosY] = positionEstimator(past_current_trial, modelParameters);
+                [decodedPosX, decodedPosY] = Ktest(past_current_trial, modelParameters, direc);
             end
             
             decodedPos = [decodedPosX; decodedPosY];
@@ -68,7 +68,7 @@ end
 
 legend('Decoded Position', 'Actual Position')
 
-RMSE = sqrt(meanSqError/n_predictions) 
+RMSE = sqrt(meanSqError/n_predictions); 
 
 rmpath(genpath(teamName))
 
