@@ -55,7 +55,7 @@ function [x, y] = positionEstimator(test_data, modelParameters)
   sigma = 20;
   
   % Return Value:
-  net = modelParameters.net;
+  net = modelParameters{test_data.dir}.net;
   lastPos = test_data.startHandPos();
 %   disp(["size of start", size(lastPos)])
   if ~isempty(test_data.decodedHandPos)

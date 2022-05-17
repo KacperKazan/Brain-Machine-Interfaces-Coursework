@@ -36,7 +36,7 @@ modelParameters = positionEstimatorTraining(trainingData);
 for tr=1:size(testData,1)
     display(['Decoding block ',num2str(tr),' out of ',num2str(size(testData,1))]);
     pause(0.001)
-    for direc=randperm(8)
+    for direc = 1:size(testData,2)
         decodedHandPos = [];
 
         times=320:20:size(testData(tr,direc).spikes,2);
@@ -47,6 +47,7 @@ for tr=1:size(testData,1)
             past_current_trial.decodedHandPos = decodedHandPos;
 
             past_current_trial.startHandPos = testData(tr,direc).handPos(1:2,1); 
+            past_current_trial.dir = direc;
             
             if nargout('positionEstimator') == 3
                 [decodedPosX, decodedPosY, newParameters] = positionEstimator(past_current_trial, modelParameters);
