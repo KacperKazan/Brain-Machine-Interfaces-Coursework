@@ -37,7 +37,7 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   X = spikes;
   T = target;
 
-  net = patternnet(10);
+  net = patternnet([32, 32]);
   net = train(net, X, T);
 
   modelParameters = struct();

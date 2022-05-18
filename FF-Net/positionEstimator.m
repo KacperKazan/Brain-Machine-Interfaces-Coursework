@@ -49,10 +49,11 @@ function [x, y] = positionEstimator(test_data, modelParameters)
   ys = [];
   for train_trial = 1:size(modelParameters.olddata, 1) %
       position_trial = modelParameters.olddata(train_trial, decision).handPos(1:2, :);
-      if (size(position_trial, 2) >= max_time) && norm(modelParameters.olddata(train_trial, decision).handPos(1:2,1) - test_data.startHandPos(1:2,1)) <= 7 %optimise this 5
-         xs = [xs, position_trial(1, max_time)];
-         ys = [ys, position_trial(2, max_time)];
-      end
+    %   if (size(position_trial, 2) >= max_time) && norm(modelParameters.olddata(train_trial, decision).handPos(1:2,1) - test_data.startHandPos(1:2,1)) <= 7
+    %     % disp("COMPENSATING!!")
+    %      xs = [xs, position_trial(1, max_time)];
+    %      ys = [ys, position_trial(2, max_time)];
+    %   end
   end
 
   if size(xs,2) == 0
