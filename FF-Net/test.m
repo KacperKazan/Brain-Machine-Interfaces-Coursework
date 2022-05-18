@@ -63,4 +63,8 @@ function RMSE = test_angle_classification_accuracy()
     end
       accuracy = sum(anglesPredictionsResults(:, 1)) / sum(anglesPredictionsResults(:, 2));
       disp(["total accuracy :", accuracy]);
+      disp("net layer dimensions")
+      for i = 1:modelParameters.net.numLayers
+        disp(modelParameters.net.layers{i}.dimensions)
+      end
 end
