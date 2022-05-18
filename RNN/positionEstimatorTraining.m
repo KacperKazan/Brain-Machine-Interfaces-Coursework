@@ -1,4 +1,4 @@
-function [Models] = positionEstimatorTraining(training_data)
+function [modelParameters] = positionEstimatorTraining(training_data)
   % Arguments:
   
   % - training_data:
@@ -15,18 +15,18 @@ function [Models] = positionEstimatorTraining(training_data)
   %     single structure containing all the learned parameters of your
   %     model and which can be used by the "positionEstimator" function.
   % separate network for each direction
-  function output = g_filter(spikes, wdw, sigma)
+  function output = g_filter(spikes)
       output = zeros(size(spikes));
       for n = 1:size(spikes,1)
-          a = 1/(sigma*sqrt(2*pi));
-          x = -(wdw-1)/2:(wdw-1)/2;
-          g = a*exp(-(x.^2)./(2*sigma^2)); 
-          g_spikes = conv(spikes(n,:),g);
-          output(n,:) = g_spikes(wdw/2:end-wdw/2);
+          output(n,:) = filter(gausswin(10), 1, spikes(n, :));
       end
   end
+
+
+    modelParameters = struct();
+    modelParameters.Models = cell(1, 8);
+    modelParameters.start = [0,0];
   
-    Models = cell(1, 8);
     % try hidden 8
     hidden = 8;
     delays = 1;
@@ -65,10 +65,11 @@ function [Models] = positionEstimatorTraining(training_data)
       end
       [Xs,Xi,Ai,Ts] = preparets(rnn_network,X,T);
       rnn_network = train(rnn_network,Xs,Ts,Xi,Ai);
-  
+      
+
       model = struct();
       model.net = rnn_network;
       close all
-      Models{dir} = model;
+      modelParameters.Models{dir} = model;
     end
 end

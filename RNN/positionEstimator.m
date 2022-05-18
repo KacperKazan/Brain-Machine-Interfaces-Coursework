@@ -1,4 +1,4 @@
-function [x, y] = positionEstimator(test_data, modelParameters)
+function [x, y, newModelParameters] = positionEstimator(test_data, modelParameters)
 
   % **********************************************************
   %
@@ -40,14 +40,10 @@ function [x, y] = positionEstimator(test_data, modelParameters)
   
   
   % ... compute position at the given timestep.
-  function output = g_filter(spikes, wdw, sigma)
+  function output = g_filter(spikes)
       output = zeros(size(spikes));
       for n = 1:size(spikes,1)
-          a = 1/(sigma*sqrt(2*pi));
-          x = -(wdw-1)/2:(wdw-1)/2;
-          g = a*exp(-(x.^2)./(2*sigma^2));
-          g_spikes = conv(spikes(n,:),g);
-          output(n,:) = g_spikes(wdw/2:end-wdw/2);
+          output(n,:) = filter(gausswin(10), 1, spikes(n, :));
       end
   end
 
@@ -55,30 +51,29 @@ function [x, y] = positionEstimator(test_data, modelParameters)
   sigma = 20;
   
   % Return Value:
-  net = modelParameters{test_data.dir}.net;
-  lastPos = test_data.startHandPos();
-%   disp(["size of start", size(lastPos)])
-  if ~isempty(test_data.decodedHandPos)
-%     disp("size of decoded");
-%     size(test_data.decodedHandPos)
-    lastPos = test_data.decodedHandPos(end-1:end);
-  end
+  net = modelParameters.Models{test_data.dir}.net;
 
   X = con2seq(g_filter(test_data.spikes, wdw, sigma));
-%   X(:,end+1:10000) = NaN;
   [Xs,Xi,Ai,~] = preparets(net,X);
   result = net(Xs,Xi,Ai);
-%   result = net(X);
 
-  x = lastPos(1);
-  y = lastPos(2);
+  x = 0;
+  y = 0;
 
   if ~isempty(result)
     Dpos = seq2con(result);
-%     Dpos = result;
     DposC = sum(Dpos{:},2);
 
-    x = DposC(1) + test_data.startHandPos(1);
-    y = DposC(2) + test_data.startHandPos(2);
+    x = DposC(1) + 0;
+    y = DposC(2) + 0;
   end
+
+  newModelParameters = modelParameters;
+  % TODO: could genralise the way we we find the start of an inference run
+  if length(test_data.spikes) == 320
+    newModelParameters.start = [x,y];
+  end
+
+  x = x - newModelParameters.start(1) + test_data.startHandPos(1);
+  y = y - newModelParameters.start(2) + test_data.startHandPos(2);
 end
