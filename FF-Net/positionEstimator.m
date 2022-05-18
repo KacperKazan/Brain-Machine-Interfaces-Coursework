@@ -40,33 +40,35 @@ function [x, y] = positionEstimator(test_data, modelParameters)
   
   
   % ... compute position at the given timestep.
-  decision = angleEstimator(test_data, modelParameters);
-  max_time = size(test_data.spikes, 2);
+  outcome = angleEstimator(test_data, modelParameters);
+  total_t = size(test_data.spikes, 2);
 
 
-  %now we know that this test instance is an angle of decision
-  xs = [];
-  ys = [];
-  for train_trial = 1:size(modelParameters.olddata, 1) %
-      position_trial = modelParameters.olddata(train_trial, decision).handPos(1:2, :);
-      if (size(position_trial, 2) >= max_time) && norm(modelParameters.olddata(train_trial, decision).handPos(1:2,1) - test_data.startHandPos(1:2,1)) <= 7 %optimise this 5
-         xs = [xs, position_trial(1, max_time)];
-         ys = [ys, position_trial(2, max_time)];
+  %using the known direction,take a mean of nearly trajectorie of trainingdata
+  x_sample = [];
+  y_sample = [];
+  training_for_trail = 1;
+  while training_for_trail <=size(modelParameters.olddata, 1) % for all data
+      pos_of_trial = modelParameters.olddata(training_for_trail, outcome).handPos(1:2, :);
+      if (size(pos_of_trial, 2) >= total_t) && norm(modelParameters.training_data(training_for_trail, outcome).handPos(1:2,1) - test_data.startHandPos(1:2,1)) <= 5 
+         x_sample = [x_sample , pos_of_trial(1, total_t)];
+         y_sample = [y_sample, pos_of_trial(2, total_t)];
       end
+      training_for_trail = training_for_trail+1;
   end
 
-  if size(xs,2) == 0
-    avg_traj = cell2mat(modelParameters.trajectories(decision));
-    if max_time < size(avg_traj,2)
-        x = avg_traj(1, max_time);
-        y = avg_traj(2, max_time);
+  if size( x_sample,2) == 0
+    average = cell2mat(modelParameters.trajectories(outcome));
+    if max_time < size(average,2)
+        x = average(1, total_t);
+        y = average(2, total_t);
     else
-        x = avg_traj(1, end);
-        y = avg_traj(2, end);
+        x = average(1, end);
+        y = average(2, end);
     end
   else
-     x = mean(xs);
-     y = mean(ys);
+     x = mean(x_sample);
+     y = mean(y_sample);
   end
 
 end
