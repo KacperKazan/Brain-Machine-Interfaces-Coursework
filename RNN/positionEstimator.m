@@ -64,8 +64,8 @@ function [x, y, newModelParameters] = positionEstimator(test_data, modelParamete
     Dpos = seq2con(result);
     DposC = sum(Dpos{:},2);
 
-    x = DposC(1) + 0;
-    y = DposC(2) + 0;
+    x = DposC(1);
+    y = DposC(2);
   end
 
   newModelParameters = modelParameters;
