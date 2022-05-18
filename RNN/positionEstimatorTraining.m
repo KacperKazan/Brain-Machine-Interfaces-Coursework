@@ -52,7 +52,7 @@ function [modelParameters] = positionEstimatorTraining(training_data)
       for N = 1:size(training_data, 1)  
         index = N;
         % preallocate X and T
-        rawInput = g_filter(training_data(N,dir).spikes,wdw,sigma);
+        rawInput = g_filter(training_data(N,dir).spikes);
         rawInput(:,end+1:MAX_LENGTH) = NaN;
         X{1, index} = rawInput;
         rawTarget = diff(training_data(N,dir).handPos(1:2,:),1,2);

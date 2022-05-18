@@ -53,7 +53,7 @@ function [x, y, newModelParameters] = positionEstimator(test_data, modelParamete
   % Return Value:
   net = modelParameters.Models{test_data.dir}.net;
 
-  X = con2seq(g_filter(test_data.spikes, wdw, sigma));
+  X = con2seq(g_filter(test_data.spikes));
   [Xs,Xi,Ai,~] = preparets(net,X);
   result = net(Xs,Xi,Ai);
 
