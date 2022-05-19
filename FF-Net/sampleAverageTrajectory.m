@@ -1,15 +1,22 @@
-function [x, y] = sampleAverageTrajectory(modelParameters, direction, total_t, startHandPos)
+function [x, y] = sampleAverageTrajectory(modelParameters, direction, total_t, startHandPos, excludedTrainingIds_optional)
+  excludedTrainingIds = [];
+  if nargin > 4
+    excludedTrainingIds = excludedTrainingIds_optional;
+  end
+
   %using the known direction, take a mean of nearly trajectorie of trainingdata
   x_sample = [];
   y_sample = [];
   training_for_trail = 1;
   while training_for_trail <=size(modelParameters.training_data, 1) % for all data
+    if ~ismember(modelParameters.training_data(training_for_trail, direction).trialId, excludedTrainingIds)
       pos_of_trial = modelParameters.training_data(training_for_trail, direction).handPos(1:2, :);
       if (size(pos_of_trial, 2) >= total_t) && norm(modelParameters.training_data(training_for_trail, direction).handPos(1:2,1) - startHandPos) <= 5 
-         x_sample = [x_sample , pos_of_trial(1, total_t)];
-         y_sample = [y_sample, pos_of_trial(2, total_t)];
+          x_sample = [x_sample , pos_of_trial(1, total_t)];
+          y_sample = [y_sample, pos_of_trial(2, total_t)];
       end
       training_for_trail = training_for_trail+1;
+    end
   end
 
   if size( x_sample,2) == 0
