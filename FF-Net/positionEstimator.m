@@ -40,34 +40,9 @@ function [x, y] = positionEstimator(test_data, modelParameters)
   
   
   % ... compute position at the given timestep.
-  decision = angleEstimator(test_data, modelParameters);
-  max_time = size(test_data.spikes, 2);
+  direction = angleEstimator(test_data, modelParameters);
+  total_t = size(test_data.spikes, 2);
 
-
-  %now we know that this test instance is an angle of decision
-  xs = [];
-  ys = [];
-  for train_trial = 1:size(modelParameters.olddata, 1) %
-      position_trial = modelParameters.olddata(train_trial, decision).handPos(1:2, :);
-    %   if (size(position_trial, 2) >= max_time) && norm(modelParameters.olddata(train_trial, decision).handPos(1:2,1) - test_data.startHandPos(1:2,1)) <= 7
-    %     % disp("COMPENSATING!!")
-    %      xs = [xs, position_trial(1, max_time)];
-    %      ys = [ys, position_trial(2, max_time)];
-    %   end
-  end
-
-  if size(xs,2) == 0
-    avg_traj = cell2mat(modelParameters.trajectories(decision));
-    if max_time < size(avg_traj,2)
-        x = avg_traj(1, max_time);
-        y = avg_traj(2, max_time);
-    else
-        x = avg_traj(1, end);
-        y = avg_traj(2, end);
-    end
-  else
-     x = mean(xs);
-     y = mean(ys);
-  end
+  [x, y] = sampleAverageTrajectory(modelParameters, direction, total_t, test_data.startHandPos(1:2,1));
 
 end

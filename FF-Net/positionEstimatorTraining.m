@@ -63,7 +63,7 @@ function [modelParameters] = positionEstimatorTraining(training_data)
  [num_trials , num_classes]= size(training_data);
 
 
-  modelParameters.olddata = training_data;
+  modelParameters.training_data = training_data;
  % find average trajectory for each angle
   trajectories = {};
   for ang = 1:num_classes
